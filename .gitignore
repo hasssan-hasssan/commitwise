@@ -1,0 +1,32 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Pytest cache
+.pytest_cache/
+
+# CommitWise temporary files
+*.tmp_commit
+
+# Distribution / build folders
+dist/
+build/
+*.egg-info/
