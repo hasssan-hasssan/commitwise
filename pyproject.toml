@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "commitwise"
+version = "0.1.0"
+description = "Generate clean git commit messages from files or AI"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "Abolfazl Hassan Zade", email = "abolfazl.hassanzade.81@gmail.com" }
+]
+keywords = ["git", "commit", "cli", "ai"]
+dependencies = ["requests>=2.31.0"]
+
+[project.scripts]
+commitwise = "commitwise.cli:main"
+
+[project.urls]
+homepage = "https://github.com/hasssan-hasssan/commitwise"
+repository = "https://github.com/hasssan-hasssan/commitwise"
+issues = "https://github.com/hasssan-hasssan/commitwise/issues"
