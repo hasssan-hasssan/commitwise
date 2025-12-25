@@ -87,7 +87,7 @@ CommitWise supports two AI modes:
 >
 >**CommitWise will automatically use OpenAI when the API key is available.**
 
-
+<br>
 
 Usage
 -----
@@ -106,7 +106,7 @@ Show help:
 $> commitwise --help
 ```
 
-
+<br>
 
 Professional Note
 -----------------
@@ -114,7 +114,7 @@ CommitWise ensures that AI-generated commit messages are clean and Git-ready,
 without extra explanations, markdown, or educational text.
 This is guaranteed through strict prompting and output cleaning.
 
-
+<br>
 
 Links
 -----
@@ -122,25 +122,10 @@ Links
 [GitHub](https://github.com/hasssan-hasssan/commitwise "GitHub repository") | 
 [PyPi](https://pypi.org/project/commitwise)
 
-
+<br>
 
 Support
 -------
 If CommitWise is helpful, please give it a star on [GitHub](https://github.com/hasssan-hasssan/commitwise "GitHub repository") so others can find it!
 
-
-
-GitHub About Section
--------------------
-CommitWise: Generate clean Git commit messages from files or AI.
-
-Supports local AI (Ollama) or OpenAI API for automatic commit generation.
-
-Simple CLI with --ai and --file modes.
-
-
-<style>
-*{
-    font-family:'Consolas' !important;
-}
-</style>
+<br>
