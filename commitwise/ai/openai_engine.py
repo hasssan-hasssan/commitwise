@@ -19,12 +19,7 @@ class OpenAIEngine(AIEngine):
             ) from exc
         client = OpenAI(api_key=self.api_key)
 
-        prompt = (
-            "You are a senior software engineer.\n"
-            "Write a clear, concise, and conventional git commit message\n"
-            "based on the following staged diff.\n\n"
-            f"{diff}"
-        )
+        prompt = self.default_prompt + f"\n{diff}"
 
         response = client.chat.completions.create(
             model=self.model,

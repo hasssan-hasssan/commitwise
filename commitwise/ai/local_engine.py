@@ -13,15 +13,7 @@ class LocalAIEngine(AIEngine):
         self.url = url.rstrip("/")
 
     def generate_commit(self, diff: str) -> str:
-        prompt = (
-            "You are a senior software engineer.\n"
-            "Write a clear, concise, and conventional git commit message\n"
-            "based on the following staged diff.\n\n"
-            f"{diff}\n\n"
-            "Follow best practices:\n"
-            "- Use conventional commit format\n"
-            "- Short title, blank line, then details if needed\n"
-        )
+        prompt = self.default_prompt + f"\n{diff}"
 
         response = requests.post(
             f"{self.url}/api/generate",
