@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from commitwise import __version__
 from commitwise.git_utils import (
     get_staged_diff,
     git_commit_with_message,
@@ -14,6 +15,13 @@ def build_parser() -> argparse.ArgumentParser:
         prog="commitwise",
         description="CommitWise - Smart Git commits, wisely.",
         formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    parser.add_argument(
+        "--version",
+        "-V",
+        action="store_true",
+        help="Display the version of commitwise that is currently installed.",
     )
 
     parser.add_argument(
@@ -42,6 +50,11 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
+    # version flag
+    if args.version:
+        print(f'commitwise {__version__}')
+        sys.exit(0)
+
     # [X] both flags used
     if args.ai and args.file:
         parser.error("Use either --ai or --file, not both.")
@@ -64,6 +77,7 @@ def main() -> None:
             message = read_commit_file(args.file)
             git_commit_with_message(message)
             return
+        
     except Exception as e:
         print(f"\n [X] Error: {e}", file=sys.stderr)
         sys.exit(1)
