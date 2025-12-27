@@ -1,49 +1,16 @@
-import argparse
 import sys
 
 from commitwise import __version__
+from commitwise.cli_utils import (
+    build_parser,
+)
 from commitwise.git_utils import (
     get_staged_diff,
     git_commit_with_message,
+    confirm_commit,
 )
 from commitwise.file_source import read_commit_file
 from commitwise.ai_source import generate_ai_commit_message
-
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="commitwise",
-        description="CommitWise - Smart Git commits, wisely.",
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-
-    parser.add_argument(
-        "--version",
-        "-V",
-        action="store_true",
-        help="Display the version of commitwise that is currently installed.",
-    )
-
-    parser.add_argument(
-        "--ai",
-        action="store_true",
-        help=(
-            "Generate commit message using AI.\n"
-            "Automatically uses OpenAI if OPENAI_APP_KEY is set,\n"
-            "otherwise falls back to a local model (Ollama)."
-        ),
-    )
-
-    parser.add_argument(
-        "--file",
-        metavar="PATH",
-        help=(
-            "Read commit message from a text file and commit it\n"
-            "exactly as written (preserves formatting)."
-        ),
-    )
-
-    return parser
 
 
 def main() -> None:
@@ -52,7 +19,7 @@ def main() -> None:
 
     # version flag
     if args.version:
-        print(f'commitwise {__version__}')
+        print(f"commitwise {__version__}")
         sys.exit(0)
 
     # [X] both flags used
@@ -69,6 +36,11 @@ def main() -> None:
         if args.ai:
             diff = get_staged_diff()
             message = generate_ai_commit_message(diff)
+
+            if not confirm_commit(message):
+                print("\n\nCommit aborted.")
+                sys.exit(0)
+
             git_commit_with_message(message)
             return
 
@@ -77,7 +49,7 @@ def main() -> None:
             message = read_commit_file(args.file)
             git_commit_with_message(message)
             return
-        
+
     except Exception as e:
         print(f"\n [X] Error: {e}", file=sys.stderr)
         sys.exit(1)
