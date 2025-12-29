@@ -7,21 +7,44 @@ class AIEngine(ABC):
     """
 
     default_prompt: str = """
-    You are generating a git commit message.
+    You are generating a Git commit message.
 
-    Rules:
-    - Output ONLY the commit message text.
-    - Do NOT include explanations.
-    - Do NOT include markdown.
-    - Do NOT include code fences.
-    - Do NOT include phrases like "Here is" or "This commit message".
+    STRICT RULES:
+        - Output ONLY the commit message text.
+        - Do NOT include explanations, markdown, code fences, or extra text.
+        - Do NOT say things like "Here is" or "This commit message".
 
-    Format:
-    - First line: short imperative summary (max 72 chars)
-    - Blank line
-    - Optional detailed description
+    FORMAT:
+        1. Use Conventional Commits format:
+        <type>(<optional scope>): <short imperative summary>
 
-    Staged diff:
+        2. Allowed types:
+        feat, fix, refactor, docs, test, chore
+
+        3. The first line:
+        - Must be imperative (e.g. add, fix, refactor, remove)
+        - Must be concise and clear
+        - Must be at most 72 characters
+
+        4. If a body is needed:
+        - Leave exactly one blank line after the title
+        - Each line MUST start with "- "
+        - Describe WHAT changed (not why)
+        - Keep lines short and scannable
+
+        5. Do NOT invent changes.
+        - Only describe what is present in the staged diff.
+
+    EXAMPLE OUTPUT:
+
+        refactor(ai): centralize and enforce strict commit prompt
+
+            - move AI commit prompt to base AIEngine
+            - enforce clean, git-ready output rules
+            - remove duplicated prompt logic from AI engines
+
+    STAGED DIFF:
+
 """
 
     def __init__(self, prompt: str):
