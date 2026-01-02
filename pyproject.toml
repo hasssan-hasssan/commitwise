@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "commitwise"
-version = "0.1.4"
+dynamic = ["version"]
 description = "Generate clean git commit messages from files or AI"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -14,6 +14,9 @@ authors = [
 ]
 keywords = ["git", "commit", "cli", "ai"]
 dependencies = ["requests>=2.31.0"]
+
+[tool.setuptools.dynamic]
+version = {attr = "commitwise.__version__"}
 
 [project.scripts]
 commitwise = "commitwise.cli:main"
