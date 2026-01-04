@@ -1,4 +1,22 @@
 from commitwise.ai.base import AIEngine
+from commitwise.errors import (
+    AIProviderNotConfigured,
+    AIProviderAuthError,
+    AIProviderRateLimitError,
+    AIProviderTimeout,
+    AIProviderConnectionError,
+    AIProviderResponseInvalid,
+)
+
+
+from openai import OpenAI
+from openai import (
+    AuthenticationError,
+    RateLimitError,
+    APIConnectionError,
+    APITimeoutError,
+    OpenAIError,
+)
 
 
 class OpenAIEngine(AIEngine):
@@ -7,29 +25,42 @@ class OpenAIEngine(AIEngine):
     """
 
     def __init__(self, api_key: str, model: str):
-        self.api_key = api_key
+        if not api_key:
+            raise AIProviderNotConfigured("OPENAI_API_KEY is not set.")
+
+        self.client = OpenAI(api_key=api_key)
         self.model = model
 
     def generate_commit(self, diff) -> str:
-        try:
-            from openai import OpenAI
-        except ImportError as exc:
-            raise RuntimeError(
-                "OpenAI SDK is not installed. Install it with: pip install openai"
-            ) from exc
-        client = OpenAI(api_key=self.api_key)
-
         prompt = self.default_prompt + f"\n{diff}"
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "user", "content": prompt},
+                ],
+            )
+        except AuthenticationError:
+            raise AIProviderAuthError("Invalid OpenAI API key.")
 
-        response = client.chat.completions.create(
-            model=self.model,
-            message=[
-                {"role": "user", "content": prompt},
-            ],
-        )
+        except RateLimitError:
+            raise AIProviderRateLimitError("OpenAI rate limit exceeded.")
 
-        message = response.choices[0].message.content.strip()
+        except APITimeoutError:
+            raise AIProviderTimeout("OpenAI request timed out.")
+
+        except APIConnectionError:
+            raise AIProviderConnectionError("Failed to connect to OpenAI API.")
+
+        except OpenAIError as exc:
+            raise AIProviderConnectionError(f"Unexpected OpenAI error: {exc}") from exc
+
+        try:
+            message = response.choices[0].message.content.strip()
+        except Exception:
+            raise AIProviderResponseInvalid("OpenAI returned an invalid response.")
 
         if not message:
-            raise RuntimeError("OpenAI returned an empty commit message.")
+            raise AIProviderResponseInvalid("OpenAI returned an empty commit message.")
+
         return message

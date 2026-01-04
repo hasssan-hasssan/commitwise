@@ -1,6 +1,16 @@
 import requests
 
+from requests.exceptions import Timeout, ConnectionError as ReqConnectionError
+
 from commitwise.ai.base import AIEngine
+from commitwise.errors import (
+    AIProviderUnavailable,
+    AIProviderTimeout,
+    AIProviderConnectionError,
+    AIProviderResponseInvalid,
+)
+
+DEFAULT_TIMEOUT = 60
 
 
 class LocalAIEngine(AIEngine):
@@ -15,25 +25,45 @@ class LocalAIEngine(AIEngine):
     def generate_commit(self, diff: str) -> str:
         prompt = self.default_prompt + f"\n{diff}"
 
-        response = requests.post(
-            f"{self.url}/api/generate",
-            json={
-                "model": self.model,
-                "prompt": prompt,
-                "stream": False,
-            },
-            timeout=60,
-        )
-
-        if response.status_code != 200:
-            raise RuntimeError(
-                f"Local AI request failed (status {response.status_code})"
+        try:
+            response = requests.post(
+                f"{self.url}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": prompt,
+                    "stream": False,
+                },
+                timeout=DEFAULT_TIMEOUT,
             )
 
-        data = response.json()
-        message = data.get("response", "").strip()
+        except Timeout:
+            raise AIProviderTimeout(
+                "Local AI model did not respond in time. "
+                "Try staging fewer changes or using a faster model."
+            )
 
-        if not message:
-            raise RuntimeError("Local AI returned an empty commit message.")
+        except ReqConnectionError:
+            raise AIProviderUnavailable(
+                "Local AI service is not reachable. "
+                "Make sure Ollama is running (ollama serve)."
+            )
 
-        return message
+        except Exception as exc:
+            raise AIProviderConnectionError(
+                f"Unexpected error while communicating with local AI: {exc}"
+            ) from exc
+
+        else:
+            if response.status_code != 200:
+                raise AIProviderUnavailable(
+                    f"Local AI request failed with status {response.status_code}."
+                )
+
+            data = response.json()
+            message = data.get("response", "").strip()
+
+            if not message:
+                raise AIProviderResponseInvalid(
+                    "Local AI returned an empty commit message."
+                )
+            return message
