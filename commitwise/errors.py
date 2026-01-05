@@ -13,6 +13,12 @@ class CommitWiseError(Exception):
     pass
 
 
+class NoStagedChangesError(CommitWiseError):
+    """Raised when no changes are staged for commit."""
+
+    pass
+
+
 class InvalidUsageError(CommitWiseError):
     """Raised when CLI arguments or usage is invalid"""
 
@@ -98,4 +104,3 @@ class AIProviderRateLimitError(AIError):
     """AIProvider rate limit exceeded"""
 
     pass
-

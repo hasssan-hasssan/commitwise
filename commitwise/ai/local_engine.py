@@ -38,13 +38,13 @@ class LocalAIEngine(AIEngine):
 
         except Timeout:
             raise AIProviderTimeout(
-                "Local AI model did not respond in time. "
+                "Local AI model did not respond in time.\n\n "
                 "Try staging fewer changes or using a faster model."
             )
 
         except ReqConnectionError:
             raise AIProviderUnavailable(
-                "Local AI service is not reachable. "
+                "Local AI service is not reachable.\n\n "
                 "Make sure Ollama is running (ollama serve)."
             )
 

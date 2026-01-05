@@ -11,6 +11,13 @@ from commitwise.git_utils import (
 )
 from commitwise.file_source import read_commit_file
 from commitwise.ai_source import generate_ai_commit_message
+from commitwise.errors import (
+    CommitWiseError,
+    NoStagedChangesError,
+    UserAbortError,
+    AIProviderTimeout,
+    AIProviderAuthError,
+)
 
 
 def main() -> None:
@@ -50,8 +57,38 @@ def main() -> None:
             git_commit_with_message(message)
             return
 
+    except UserAbortError:
+        print("\nCommit aborted.")
+        sys.exit(0)
+
+    except AIProviderTimeout:
+        print(
+            "\n[X] AI provider timed out.\n\n"
+            "This may happen due to a large diff or slow local inference.\n"
+            "Try committing smaller changes or another AI provider."
+        )
+        sys.exit(2)
+
+    except AIProviderAuthError:
+        print(
+            "\n[X] AI authentication failed.\n\n"
+            "Please check your API key configuration."
+        )
+        sys.exit(3)
+
+    except NoStagedChangesError:
+        print(
+            "\n[X] No staged changes found.\n\n"
+            "Please run `git add` before using CommitWise."
+        )
+        sys.exit(0)
+
+    except CommitWiseError as e:
+        print(f"\n[X] {e}", file=sys.stderr)
+        sys.exit(1)
+
     except Exception as e:
-        print(f"\n [X] Error: {e}", file=sys.stderr)
+        print(f"\n[X] {e}", file=sys.stderr)
         sys.exit(1)
 
 

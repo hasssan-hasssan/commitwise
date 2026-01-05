@@ -3,6 +3,7 @@ import tempfile
 import os
 
 from commitwise.cli_utils import read_single_key
+from commitwise.errors import NoStagedChangesError
 
 
 def get_staged_diff() -> str:
@@ -16,9 +17,8 @@ def get_staged_diff() -> str:
     diff = result.stdout.strip()
 
     if not diff:
-        raise RuntimeError(
-            "No staged changes found.\nPlease run `git add` before using CommitWise."
-        )
+        raise NoStagedChangesError("No staged changes found.")
+    
     return diff
 
 

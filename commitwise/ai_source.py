@@ -6,6 +6,7 @@ from commitwise.config import (
 
 from commitwise.ai.openai_engine import OpenAIEngine
 from commitwise.ai.local_engine import LocalAIEngine
+from commitwise.errors import AIError, AIProviderNotConfigured
 
 
 def generate_ai_commit_message(diff: str) -> str:
@@ -18,6 +19,9 @@ def generate_ai_commit_message(diff: str) -> str:
 
     Raises a clear error if no AI provider is available.
     """
+
+    last_error: AIError | None = None
+
     # Try OpenAI
     if OPENAI_API_KEY:
         try:
@@ -26,23 +30,27 @@ def generate_ai_commit_message(diff: str) -> str:
                 model="gpt-4.1-mini",
             )
             return engine.generate_commit(diff)
-        except Exception as exc:
-            raise RuntimeError(
-                "Failed to generate commit message using OpenAI."
-            ) from exc
+        except AIError as exc:
+            last_error = exc
 
     # Fallback to Local AI
-    try:
-        engine = LocalAIEngine(
-            model=LOCAL_MODEL,
-            url=LOCAL_API_URL,
-        )
-        return engine.generate_commit(diff)
-    except Exception as exc:
-        raise RuntimeError(
-            "No AI provider available.\n\n"
-            "To use AI commits, you must either:\n"
-            "- Set OPENAI_API_KEY to use OpenAI\n"
-            "- Or install and run a local AI model (e.g. Ollama)\n\n"
-            "https://ollama.com"
-        ) from exc
+    if LOCAL_MODEL and LOCAL_API_URL:
+        try:
+            engine = LocalAIEngine(
+                model=LOCAL_MODEL,
+                url=LOCAL_API_URL,
+            )
+            return engine.generate_commit(diff)
+        except AIError as exc:
+            last_error = exc
+
+    if last_error:
+        raise last_error
+
+    raise AIProviderNotConfigured(
+        "No AI provider is configured.\n\n"
+        "To use AI commits, you must either:\n"
+        "- Set OPENAI_API_KEY to use OpenAI\n"
+        "- Or install and run a local AI model (e.g. Ollama)\n\n"
+        "https://ollama.com"
+    )
